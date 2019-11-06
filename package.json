@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/rakatk0/lou-collisions/issues"
   },
-  "homepage": "https://github.com/rakatk0/lou-collisions#readme"
+  "homepage": "https://github.com/rakatk0/lou-collisions#readme",
+  "dependencies": {
+    "chalk": "^2.4.2"
+  }
 }

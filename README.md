@@ -10,29 +10,18 @@
 ### workflow to a webmap
 #### fetch data & unzip
 
-*Points* - [Louisville Metro Pedestrian Collisions](https://data.louisvilleky.gov/dataset/traffic-collisions/resource/715cac80-6258-4160-86cd-0d53437edc0a#{})
-[direct link to csv](https://data.louisvilleky.gov/sites/default/files/KSIPedestrians2009-2018_0.csv)
+*Points* - [Louisville Demolitions](https://data.louisvilleky.gov/dataset/jefferson-county-demolitions)
+[direct link to csv](https://data.louisvilleky.gov/sites/default/files/All%20Down%20%26%20Clear%20from%20FY2003%20to%20FY2019_0.csv)
 
 *Polygons* - [Louisville Metro Council Districts](https://data.louisvilleky.gov/dataset/metro-council-districts)
 [direct link to csv](https://data.louisvilleky.gov/sites/default/files/Council_Districts.zip)
 
 
 ```bash
-$ curl -LOk https://data.louisvilleky.gov/sites/default/files/KSIPedestrians2009-2018_0.csv
+$ curl -LOk https://data.louisvilleky.gov/sites/default/files/LMPD_STOPS_DATA_12.csv
 $ curl -LOk https://data.louisvilleky.gov/sites/default/files/Council_Districts.zip
 $ unzip Council_Districts.zip
 ```
-
-The demolition file name is too long and bulky. Let's shorten it. 
-```bash
-$ mv KSIPedestrians2009-2018_0.csv project-files/collisions.csv
-```
-...and inspect it
-```bash
-$ mapshaper collisions.csv -info
-```
-
-
 
 ### inspect the data
 
@@ -118,74 +107,14 @@ We've got 26 polygons in this shapefile.  Let's filter fields for only the one's
 Next let's check the output json using [geojson.io](geojson.io) to quickly check a geojson. This can be sufficient for smaller data, but can be easily overloaded.  
 ![checking the geojson](images/geojson.io-check.png)
 
-For the polygon data, we're done for now.  Next we need to wrangle the csv into something workable
+For the polygon data, we're done for now.  
 
 ##  csv workflow
-let's take a look at the point data...
-
-```bash
-λ mapshaper collisions.csv -info
-[i] Auto-detected number fields: IncidentId, Latitude, Longitude, Milepoint, CollisionTime, UnitsInvolved, MotorVehiclesInvolved, NumberKilled, NumberInjured, AcceptedDate, OwnerBadge
-[info]
-=========================
-Layer 1 *
--------------------------
-Name:     collisions
-Type:     tabular data
-Records:  811
-
-Attribute data
------------------------+---------------------------------------------
- Field                 | First value
------------------------+---------------------------------------------
- AcceptedDate          |    43465.43922
- AgencyName            | 'LOUISVILLE METRO POLICE DEPT'
- AgencyORI             | '0568000'
- BetweenStRdwy1        | ''
- BetweenStRdwy2        | ''
- BetweenStRdwyName1    | ''
- BetweenStRdwyName2    | ''
- CollisionDate         | '12/30/2018'
- CollisionTime         |     1651
- County                | 'JEFFERSON'
- DirAnalysisCode       | 'COLLISION WITH PEDESTRIAN IN INTERSECTION'
- HitandRun             | 'FALSE'
- IncidentId            | 24436019
- IncidentStatus        | 'Accepted'
- IncidentStatusDesc    | 'Accepted'
- IntersectionRdwy      | ''
- IntersectionRdwyName  | 'GRINSTEAD'
- IsSecondaryCollision  | 'FALSE'
- Latitude              |       38.23855613
- LightCondition        | 'DAYLIGHT'
- Longitude             |      -85.72115038
- MannerofCollision     | 'SINGLE VEHICLE'
- Milepoint             |       15.437
- MotorVehiclesInvolved |        1
- NumberInjured         |        1
- NumberKilled          |        0
- OwnerBadge            |     5207
- RampFromRdwyId        | ''
- RampToRdwyId          | ''
- RdwyCharacter         | 'STRAIGHT & LEVEL'
- RdwyConditionCode     | 'DRY'
- RdwyNumber            | 'US0031E'
- RoadwayName           | 'BARDSTOWN'
- Street                | ''
- StreetDir             | ''
- StreetSfx             | 'RD'
- UnitsInvolved         |        2
- Weather               | 'CLEAR'
------------------------+---------------------------------------------
-```
 
 
 
-filter fields
 
-let's use JS to strip this down, convert to geojson with proper EPSG
-
-
+npm install chalk
 #### data analysis and manipulation
 
 ##### reprojection
