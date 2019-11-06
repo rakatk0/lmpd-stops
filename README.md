@@ -1,4 +1,4 @@
-# lmpd-stops
+# Louisville Demolitions
 
 <!-- 
 * A web map displaying:
@@ -10,8 +10,8 @@
 ### workflow to a webmap
 #### fetch data & unzip
 
-*Points* - [Louisville Metro Police Department Stops 2009-present](https://data.louisvilleky.gov/dataset/lmpd-stops-data)
-[direct link to csv](https://data.louisvilleky.gov/sites/default/files/LMPD_STOPS_DATA_12.csv)
+*Points* - [Louisville Demolitions](https://data.louisvilleky.gov/dataset/jefferson-county-demolitions)
+[direct link to csv](https://data.louisvilleky.gov/sites/default/files/All%20Down%20%26%20Clear%20from%20FY2003%20to%20FY2019_0.csv)
 
 *Polygons* - [Louisville Metro Council Districts](https://data.louisvilleky.gov/dataset/metro-council-districts)
 [direct link to csv](https://data.louisvilleky.gov/sites/default/files/Council_Districts.zip)
@@ -27,9 +27,41 @@ $ unzip Council_Districts.zip
 
 Point data is available in csv format, while polygon data comes as a zipped shapefile. 
 
-```bash
-$ ogrinfo council_districts.shp council_districts -so
+```powershell
+ogrinfo council_districts.shp council_districts -so
+INFO: Open of `council_districts.shp'
+      using driver `ESRI Shapefile' successful.
+
+Layer name: council_districts
+Geometry: Polygon
+Feature Count: 26
+Extent: (-85.947122, 37.996911) - (-85.404846, 38.380231)
+ERROR 4: Unable to open EPSG support file gcs.csv.  Try setting the GDAL_DATA environment variable to point to the directory containing EPSG csv files.
+Layer SRS WKT:
+GEOGCS["GCS_WGS_1984",
+    DATUM["WGS_1984",
+        SPHEROID["WGS_84",6378137,298.257223563]],
+    PRIMEM["Greenwich",0],
+    UNIT["Degree",0.017453292519943295]]
+intersect_: Integer64 (18.0)
+objectid: Integer64 (18.0)
+coundist: Integer64 (18.0)
+coun_yr_el: Integer64 (18.0)
+coun_term: Integer64 (18.0)
+coun_web: String (80.0)
+coun_phone: String (80.0)
+coun_party: String (80.0)
+coun_name: String (80.0)
+coun_loc: String (80.0)
+coun_fax: String (80.0)
+coun_email: String (80.0)
+coun_add: String (80.0)
+comments: String (80.0)
+shape_len: Real (24.15)
+shape_area: Real (24.15)
 ```
+From this output we can see the shapefile is projected in WGS84, which won't require conversion.  Also, we can now scope which attribute fields we may ditch.  
+
 ```bash
 λ mapshaper council_districts.shp -info
 [info]
@@ -65,13 +97,20 @@ Attribute data
 ------------+-------------------------------------------------------------------
 ```
 
-We've got 26 districts, and quite a bit of data we can scrub out of this dataset.  First let's convert to geojson 
+We've got 26 polygons in this shapefile.  Let's filter fields for only the one's we want, simplify the geometry, convert to geojson, and write to the data folder.  
 
 ```bash
-mapshaper cb_2016_us_county_20m.shp -filter-fields COUNTYFP,NAME,STATEFP -simplify dp 15% -o precision=.0001 format=geojson ../data/us-counties.json
+λ mapshaper ../project-files/council_districts/council_districts.shp -filter-fields objectid,coundist,coun_party -simplify dp 85% -o precision=.0001 format=geojson ../data/council-districts.json
+[o] Wrote ..\data\council-districts.json
 ```
 
+Next let's check the output json using [geojson.io](geojson.io) to quickly check a geojson. This can be sufficient for smaller data, but can be easily overloaded.  
+![checking the geojson](images/geojson.io-check.png)
+
+For the polygon data, we're done for now.  
+
 ##  csv workflow
+
 
 #### data analysis and manipulation
 
