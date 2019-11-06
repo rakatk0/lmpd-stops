@@ -1,19 +1,19 @@
 {
-  "name": "lmpd-stops",
+  "name": "lou-collisions",
   "version": "1.0.0",
-  "description": "",
+  "description": "<!-- \r * A web map displaying:\r     * areal (polygon) features colored thematically (either qualitative or quantitative) using colors extracted from _cartocolors.json_.\r     * an overlay of point features utilizing the Leaflet.markercluster plugin\r     * an appropriate title, legend, meta data (link to source, etc.)\r     * **challenge:** experiments within coordinated visualization between the mapped features and the legend or another infographic (such as a bar chart) -->",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rakatk0/lmpd-stops.git"
+    "url": "git+https://github.com/rakatk0/lou-collisions.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/rakatk0/lmpd-stops/issues"
+    "url": "https://github.com/rakatk0/lou-collisions/issues"
   },
-  "homepage": "https://github.com/rakatk0/lmpd-stops#readme"
+  "homepage": "https://github.com/rakatk0/lou-collisions#readme"
 }
