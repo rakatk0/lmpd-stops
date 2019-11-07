@@ -1,55 +1,184 @@
-<!doctype html>
+<!DOCTYPE html>
 
-<html lang="en">
+<html lang='en'>
 
 <head>
-  <meta charset="utf-8">
+  <meta charset='utf-8' />
 
-  <title>Lesson 02 template</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" />
+  <title>Louisville Pedestrian Collisions 2009-2018</title>
+  <link rel='stylesheet' href='https://unpkg.com/leaflet@1.3.1/dist/leaflet.css' />
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-
+    body,
     #map {
       position: absolute;
       width: 100%;
       top: 0;
       bottom: 0;
+      margin: 0;
+      padding: 0;
+      background: rgba(0, 0, 0, 0.75);
     }
+
+    /* interactive tooltip styling */
+    .tooltip {
+      color: white;
+      background: #0B7072;
+      border: 0;
+      font-size: 1.3em;
+    }
+
+    .info {
+      padding: 6px 8px;
+      font: 14px/16px Arial, Helvetica, sans-serif;
+      background: white;
+      background: rgba(255,255,255,0.8);
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 5px;
+    }
+
+    .legend {
+      line-height: 20px;
+      color: #555;
+    }
+
+    .legend i {
+      width: 13px;
+      height: 13px;
+      float: left;
+      margin-right: 8px;
+    }
+
   </style>
 </head>
 
 <body>
+  <div id='map'></div>
 
-  <div id="map"></div>
+  <!-- setup environment -->
+  <script src='https://unpkg.com/leaflet@1.3.1/dist/leaflet.js'></script>
+  <script src='https://code.jquery.com/jquery-3.2.1.min.js' integrity='sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=' crossorigin='anonymous'></script>
 
-  <script src="https://d3js.org/d3-fetch.v1.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
+  <!-- setup map options -->
   <script>
-    // map options
-    var options = {
-      center: [37.265, -94.04],
-      zoom: 4
-    }
-    // instantiate Leaflet map
-    var map = L.map('map', options);
+    const options = {
+      center: [38.19475173645616, -85.69885253906251],
+      zoom: 11,
+      zoomLevel: 0,
+      minZoom: 11,
+      maxZoom: 16,
+      // maxBounds: [
+      //   [35.269168, -106.383361],
+      //   [34.91915, -106.84547]
+      // ]
+    };
+    const map = L.map('map', options);
 
-    // add CARTO voyager tiles with no labels
-    L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager_nolabels/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy;<a href="https://carto.com/attribution">CARTO</a>'
-    }).addTo(map);
-    
-    d3.json('data/council-districts.json').then(function(data) {
-      L.geoJson(data).addTo(map)
+    //  write options for each map layer
+    const districtOptions = {
+      fillColor: '#6F4926',
+      fillOpacity: 0.4,
+      stroke: false,
+    };
+
+    const collisionsOptions = {
+      fillColor: '#10B0B3',
+      radius: 1,
+      color: '#15F1F6',
+      opacity: .5,
+      weight: 1,
+      fillOpacity: 0.9,
+    };
+
+    // place labels above map
+    map.createPane('labels');
+    map.getPane('labels').style.zindex = 650;
+    map.getPane('labels').style.pointerEvents = 'none';
+
+    // load carto labels basemap
+
+    L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+        attribution: '©OpenStreetMap, ©CartoDB',
+        pane: 'labels',
+      }
+    ).addTo(map);
+
+
+    // jqeury geojsons and draw map
+    $.when(
+      $.getJSON('data/districts-fatal.geojson'),
+      $.getJSON('data/collisions.geojson'),
+    ).done((districts, collisions) => {
+      drawMap(districts, collisions);
     });
 
+    // define drawmap function
+    function drawMap(districtsData, collisionsData) {
+      L.geoJson(districtsData, {
+        style: districtOptions
+      }).addTo(map);
+
+      L.geoJson(collisionsData, {
+        style: collisionsOptions,
+     
+
+        // style locations as points instead of markers
+        pointToLayer: (feature, latlng) => {
+          return L.circleMarker(latlng);
+        },
+        onEachFeature: function(feature, layer) {
+
+          // shortcut to variable
+          let tooltip = `${ feature.properties.coundist } ${ feature.properties['nofatalities'] }`;
+
+          // bind the tooltip to the layer
+          layer.bindTooltip(tooltip, {
+            sticky: false,
+            className: 'tooltip'
+          });
+        
+          
+
+          // visual affordance on mouseover
+          layer.on('mouseover', function(e) {
+            this.setStyle({
+              radius: 8,
+            });
+          });
+
+          // reset default styles
+          layer.on('mouseout', function(e) {
+            this.setStyle(collisionsOptions);
+          });
+        }
+      }).addTo(map);
+    }
+
+    // var legend = L.control({ position: 'bottomleft' });
+
+    // build legend and add to map
+    // legend.onAdd = (map) => {
+    //   var div = L.DomUtil.create('div', 'info legend');
+    //   var types = [ 'Proposed Bike Trail', 'Shared Roadway (Bikes and Automobiles)', 'Bikes and Pedestrians Only', 'Other' ];
+
+    //   types.forEach(type => {
+    //     div.innerHTML += `<i style="border: ${ styleLegendBorder(type) }"></i> ${ type }<br>`;
+    //   });
+
+    //   div.innerHTML += `<i style="border-radius: 25px; border: 1px solid #15F1F6; background-color: #10B0B3;"></i> School<br>`
+
+    //   return div;
+    // };
+
+    // legend.addTo(map);
+
+    function styleLegendBorder(type) {
+      return type === 'Proposed Bike Trail' ? '2px dotted #A62706' :
+              type === 'Shared Roadway (Bikes and Automobiles)' ? '2px solid #CF6709' :
+                type === 'Bikes and Pedestrians Only' ? '2px solid #F8ED88' :
+                  '2px solid #A28FC7';
+    }
   </script>
 </body>
 
 </html>
-
