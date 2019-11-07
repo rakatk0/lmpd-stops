@@ -1,182 +1,191 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html lang='en'>
+<html lang="en">
 
 <head>
-  <meta charset='utf-8' />
+  <meta charset="utf-8">
 
-  <title>Louisville Pedestrian Collisions 2009-2018</title>
-  <link rel='stylesheet' href='https://unpkg.com/leaflet@1.3.1/dist/leaflet.css' />
-  <style>
-    body,
+  <title>Austin Traffic Districts</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" />
+  <link rel="stylesheet" href="libs/Leaflet.markercluster/MarkerCluster.Default.css"> />
+  <link rel="stylesheet" href="libs/Leaflet.markercluster/MarkerCluster.css"> /><style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
     #map {
       position: absolute;
       width: 100%;
       top: 0;
       bottom: 0;
-      margin: 0;
-      padding: 0;
-      background: rgba(0, 0, 0, 0.75);
     }
-
-    /* interactive tooltip styling */
-    .tooltip {
-      color: white;
-      background: #0B7072;
-      border: 0;
-      font-size: 1.3em;
+    #ui {
+      position: absolute;
+      z-index: 1000; /* place above map */
+      bottom: 18px;
+      right: 18px;
+      padding: 6px 12px;
+      background: rgba(256,256,256,.9);
     }
-
-    .info {
-      padding: 6px 8px;
-      font: 14px/16px Arial, Helvetica, sans-serif;
-      background: white;
-      background: rgba(255,255,255,0.8);
-      box-shadow: 0 0 15px rgba(0,0,0,0.2);
-      border-radius: 5px;
+    #ui ul {
+        list-style-type: none;
+        padding: 0;
     }
-
-    .legend {
-      line-height: 20px;
-      color: #555;
+    #ui li {
+        margin-bottom: 6px;
     }
-
-    .legend i {
-      width: 13px;
-      height: 13px;
-      float: left;
-      margin-right: 8px;
+    #ui a {
+        text-decoration: none;
+    }
+    #ui a:hover {
+        font-weight: bold;
+    }
+    .highlight {
+        font-weight: bold;
     }
 
   </style>
 </head>
 
 <body>
-  <div id='map'></div>
 
-  <!-- setup environment -->
-  <script src='https://unpkg.com/leaflet@1.3.1/dist/leaflet.js'></script>
-  <script src='https://code.jquery.com/jquery-3.2.1.min.js' integrity='sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=' crossorigin='anonymous'></script>
+  <!-- LEGEND -->
+  <div id="ui">
+    <h3>Louisville Pedestrian Collisions</h3>
+    <ul id="legend-list"></ul>
+  </div>
 
-  <!-- setup map options -->
+  <div id="map"></div>
+
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+  <script src="libs/Leaflet.markercluster/leaflet.markercluster.js"></script>
   <script>
     const options = {
-      center: [38.19475173645616, -85.69885253906251],
-      zoom: 11,
-      zoomLevel: 0,
-      minZoom: 11,
-      maxZoom: 16,
-      // maxBounds: [
-      //   [35.269168, -106.383361],
-      //   [34.91915, -106.84547]
-      // ]
-    };
-    const map = L.map('map', options);
-
-    //  write options for each map layer
-    const districtOptions = {
-      fillColor: '#6F4926',
-      fillOpacity: 0.4,
-      stroke: false,
-    };
-
-    const collisionsOptions = {
-      fillColor: '#10B0B3',
-      radius: 1,
-      color: '#15F1F6',
-      opacity: .5,
-      weight: 1,
-      fillOpacity: 0.9,
-    };
-
-    // place labels above map
-    map.createPane('labels');
-    map.getPane('labels').style.zindex = 650;
-    map.getPane('labels').style.pointerEvents = 'none';
-
-    // load carto labels basemap
-
-    L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
-        attribution: '©OpenStreetMap, ©CartoDB',
-        pane: 'labels',
-      }
-    ).addTo(map);
-
-
-    // jqeury geojsons and draw map
-    $.when(
-      $.getJSON('data/districts-fatal.geojson'),
-      $.getJSON('data/collisions.geojson'),
-    ).done((districts, collisions) => {
-      drawMap(districts, collisions);
-    });
-
-    // define drawmap function
-    function drawMap(districtsData, collisionsData) {
-      L.geoJson(districtsData, {
-        style: districtOptions
-      }).addTo(map);
-
-      L.geoJson(collisionsData, {
-        style: collisionsOptions,
-     
-
-        // style locations as points instead of markers
-        pointToLayer: (feature, latlng) => {
-          return L.circleMarker(latlng);
-        },
-        onEachFeature: function(feature, layer) {
-
-          // shortcut to variable
-          let tooltip = `${ feature.properties.coundist } ${ feature.properties['nofatalities'] }`;
-
-          // bind the tooltip to the layer
-          layer.bindTooltip(tooltip, {
-            sticky: false,
-            className: 'tooltip'
-          });
-        
-          
-
-          // visual affordance on mouseover
-          layer.on('mouseover', function(e) {
-            this.setStyle({
-              radius: 8,
-            });
-          });
-
-          // reset default styles
-          layer.on('mouseout', function(e) {
-            this.setStyle(collisionsOptions);
-          });
-        }
-      }).addTo(map);
+        center: [38.19475173645616, -85.69885253906251],
+      zoom: 10
     }
 
-    // var legend = L.control({ position: 'bottomleft' });
+    const map = L.map('map', options);
 
-    // build legend and add to map
-    // legend.onAdd = (map) => {
-    //   var div = L.DomUtil.create('div', 'info legend');
-    //   var types = [ 'Proposed Bike Trail', 'Shared Roadway (Bikes and Automobiles)', 'Bikes and Pedestrians Only', 'Other' ];
+    L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager_nolabels/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy;<a href="https://carto.com/attribution">CARTO</a>'
+    }).addTo(map);
 
-    //   types.forEach(type => {
-    //     div.innerHTML += `<i style="border: ${ styleLegendBorder(type) }"></i> ${ type }<br>`;
-    //   });
+    // use D3 fetch to request data with async requests
+    const districtsData = d3.json('data/districts-fatal.geojson');
+    const collisionsData = d3.json('data/collisions.geojson');
+    const colorsData = d3.json('data/vividcolors.json');
 
-    //   div.innerHTML += `<i style="border-radius: 25px; border: 1px solid #15F1F6; background-color: #10B0B3;"></i> School<br>`
+    // use Promise to wait until data is all loaded
+    Promise.all([districtsData, collisionsData, colorsData]).then(dataReady);
 
-    //   return div;
-    // };
 
-    // legend.addTo(map);
+    function dataReady(data) {
+      // function is called when Promise is fulfilled and data is ready
 
-    function styleLegendBorder(type) {
-      return type === 'Proposed Bike Trail' ? '2px dotted #A62706' :
-              type === 'Shared Roadway (Bikes and Automobiles)' ? '2px solid #CF6709' :
-                type === 'Bikes and Pedestrians Only' ? '2px solid #F8ED88' :
-                  '2px solid #A28FC7';
+      // inspect array of data
+      console.log(data);
+
+      // pull out separate data arrays and assign to variables
+      const districts = data[0];
+      const colors = data[2];
+      const signals = data[1];
+      
+      // const districts = districtsData[0];
+      // const colors = colorsData[0];
+      // const signals = signalsData[0];
+
+      // store a reference to the HTML list
+      const legendList = $('#legend-list');
+
+  // loop through the features and create a new
+  // list item for each feature in the legend
+      for(let i = 1; i <= districts.features.length; i++) {
+          legendList.append('<li class="legend-item" id="district-' + i + '"><a style="color:' + colors.Vivid[10][i -1] + '" href="#">District ' + i + ' (<span></span>)</a></li>');
+      }
+
+      // create a layer Groups with the geojson data
+      // create a layerGroup with the geojson data
+var districtsLayerGroup = L.geoJson(districts, {
+  style: function (feature) {
+    // use the colors object to style
+    // each polygon a unique color
+    return {
+      color: colors.Vivid[10][feature.properties.fatality - 1],
+      fillOpacity: .6
+    }
+  },
+  onEachFeature(feature, layer) {
+    // select each legend list item span and append the total count of signals
+    $('#district-' + feature.properties.coundist + ' span').append(feature.properties.fatality);
+
+    //when mousing over a polygon layer
+    layer.on('mouseover', function () {
+      // provide a visual affordance
+      this.setStyle({
+        fillOpacity: .8
+      });
+
+      // select the corresponding list item
+      // and add the highlight class to make bold
+      $('#district-' + feature.properties.coundist).addClass('highlight');
+      
+    })
+
+    // select all the list items and on mouseover
+    $('.legend-item').on('mouseover', function() {
+        // extract the specific number from the specific item
+        // being moused over
+        var num = this.id.replace('district-', '');
+        // send this number as an argument to the highlightDistrict function
+        highlightDistrict(num);
+                  // reset default styles
+        layer.on('mouseout', function(e) {
+          this.setStyle(collisionsOptions);
+        });
+    });
+
+    function highlightDistrict(districtNum) {
+        // loop through the districts polygons
+        districtsLayerGroup.eachLayer(function(layer) {
+            // if the district id matches the one we're mousing over
+            if(layer.feature.properties.coundist === districtNum) {
+                // change the layer style
+                layer.setStyle({
+                    fillOpacity: .8
+                }).bringToFront();
+            } else {
+                // return to original
+                layer.setStyle({
+                    fillOpacity: .6
+                });
+            }
+        });
+    }
+      }
+  
+}).addTo(map);
+// create new markerClusterGroup
+var markers = L.markerClusterGroup();
+
+// loop through all our signals features
+signals.features.forEach(function(feature) {
+  // create a new Leaflet marker for each
+  var coords = feature.geometry.coordinates,
+      marker = L.marker([coords[1], coords[0]]);
+  // bind a tooltip to the marker
+  marker.bindTooltip("Signal ID: " + feature.properties.SIGNAL_ID);
+  // add the marker to the markerClusterGroup
+  markers.addLayer(marker);
+
+});
+// add the markerClusterGroup to the map
+map.addLayer(markers);
     }
   </script>
 </body>
