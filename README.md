@@ -10,15 +10,15 @@
 ### workflow to a webmap
 #### fetch data & unzip
 
-*Points* - [Louisville Demolitions](https://data.louisvilleky.gov/dataset/jefferson-county-demolitions)
-[direct link to csv](https://data.louisvilleky.gov/sites/default/files/All%20Down%20%26%20Clear%20from%20FY2003%20to%20FY2019_0.csv)
+*Points* - [Louisville Pedestrian Collisions](https://data.louisvilleky.gov/dataset/traffic-collisions/resource/715cac80-6258-4160-86cd-0d53437edc0a#{})
+[direct link to csv](https://data.louisvilleky.gov/sites/default/files/KSIPedestrians2009-2018_0.csv)
 
 *Polygons* - [Louisville Metro Council Districts](https://data.louisvilleky.gov/dataset/metro-council-districts)
 [direct link to csv](https://data.louisvilleky.gov/sites/default/files/Council_Districts.zip)
 
 
 ```bash
-$ curl -LOk https://data.louisvilleky.gov/sites/default/files/LMPD_STOPS_DATA_12.csv
+$ curl -LOk https://data.louisvilleky.gov/sites/default/files/KSIPedestrians2009-2018_0.csv
 $ curl -LOk https://data.louisvilleky.gov/sites/default/files/Council_Districts.zip
 $ unzip Council_Districts.zip
 ```
@@ -111,16 +111,14 @@ For the polygon data, we're done for now.
 
 ##  csv workflow
 
+Next we'll jump into a jupyter notebook to analyze and wrangle the csv dataset.
 
+the csv doesn't have any fields that can be used to easily join with the polygon layer, so we'll have to add a field to the polygon layer's attribute table to capture this data.  
 
-
-npm install chalk
 #### data analysis and manipulation
 
 ##### reprojection
 
-###### jupyter notebook?
-<!-- switching to Windows Anaconda Powershell...  -->
 
 #### conversion to geojson 
 
